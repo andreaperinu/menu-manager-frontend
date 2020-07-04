@@ -1,34 +1,59 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
-const initialState = {
+let state = {
   menus: [],
   dishes: []
 }
 
-export const useStore = () => {
-  const [state, setState] = useState(initialState)
+let listeners = []
+
+export const A = {
+  GET_DISH: 'GET_DISH',
+  GET_DISHES: 'GET_DISHES',
+  CREATE_DISH: 'CREATE_DISH',
+}
+
+export const useStore = (shouldListen = true) => {
+
+  const setState = useState(state)[1]
 
   const dispatch = async (action, payload) => {
 
     let newState = null
     switch (action) {
-      case 'getDish':
-        newState = await getDish(payload, state)
+      case A.GET_DISH:
+        state = await getDish(payload, state)
         break;
 
-      case 'getDishes':
-        newState = await getDishes(payload, state)
+      case A.CREATE_DISH:
+        state = await createDish(payload, state)
+        break;
+
+      case A.GET_DISHES:
+        state = await getDishes(payload, state)
         break;
 
       default:
         break;
     }
 
+    for (const listener of listeners) listener(state)
+
     setState(newState)
   }
 
+  useEffect(() => {
+    shouldListen && listeners.push(setState)
+
+    return () => {
+      if (!shouldListen) return
+      listeners = listeners.filter(listener => listener !== setState)
+    }
+  }, [setState, shouldListen])
+
   return [state, useCallback(dispatch, [])]
 }
+
 
 const getDish = async ({ id }, state) => {
 
@@ -52,6 +77,33 @@ const getDish = async ({ id }, state) => {
     dishes: [
       ...state.dishes,
       dish
+    ]
+  }
+}
+
+const createDish = async ({ name, description, price }, state) => {
+  const graphqlQuery = {
+    query: `
+      mutation createDish($name: String!, $description: String, $price: Int!) {
+        createDish(data: { name: $name, description: $description, price: $price }) {
+          _id
+          name
+          description
+          price
+        }
+      }
+    `,
+    variables: { name, description, price }
+  }
+
+  const response = await doFetch(graphqlQuery)
+  const { data: { createDish: createdDish } } = response
+
+  return {
+    ...state,
+    dishes: [
+      ...state.dishes,
+      createdDish
     ]
   }
 }

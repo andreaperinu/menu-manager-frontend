@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 import SwipeableViews from 'react-swipeable-views';
 import AppBar from '@material-ui/core/AppBar';
@@ -9,7 +9,7 @@ import Box from '@material-ui/core/Box';
 import Dish from './components/Dish/Dish'
 import Menu from './components/Menu/Menu'
 
-import { useStore } from "./store";
+import { A, useStore } from "./store";
 
 import styles from './App.module.css'
 
@@ -34,11 +34,7 @@ const App = () => {
 
   const [activeTab, setActiveTab] = useState(0)
 
-  useEffect(() => {
-    dispatch('getDish', { id: '5ef2555f0bcbcd7a8505e5ce' })
-  }, [dispatch]);
-
-  const getDishes = useCallback(({ page }) => dispatch('getDishes', { page }), [dispatch])
+  const getDishes = useCallback(({ page }) => dispatch(A.GET_DISHES, { page }), [dispatch])
 
   const { menus, dishes } = state
 
