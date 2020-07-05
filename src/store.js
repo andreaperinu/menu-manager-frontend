@@ -11,6 +11,7 @@ export const A = {
   GET_DISH: 'GET_DISH',
   GET_DISHES: 'GET_DISHES',
   CREATE_DISH: 'CREATE_DISH',
+  DELETE_DISH: 'DELETE_DISH'
 }
 
 export const useStore = (shouldListen = true) => {
@@ -19,18 +20,26 @@ export const useStore = (shouldListen = true) => {
 
   const dispatch = async (action, payload) => {
 
-    let newState = null
     switch (action) {
       case A.GET_DISH:
-        state = await getDish(payload, state)
+        state = await getDish(payload)
         break;
 
       case A.CREATE_DISH:
-        state = await createDish(payload, state)
+        state = await createDish(payload)
         break;
 
+      case A.DELETE_DISH:
+        state = await deleteDish(payload)
+        break;
+
+      case A.DELETE_DISHES:
+        state = await deleteDishes(payload)
+        break;
+
+
       case A.GET_DISHES:
-        state = await getDishes(payload, state)
+        state = await getDishes(payload)
         break;
 
       default:
@@ -38,8 +47,6 @@ export const useStore = (shouldListen = true) => {
     }
 
     for (const listener of listeners) listener(state)
-
-    setState(newState)
   }
 
   useEffect(() => {
@@ -55,7 +62,7 @@ export const useStore = (shouldListen = true) => {
 }
 
 
-const getDish = async ({ id }, state) => {
+const getDish = async ({ id }) => {
 
   const graphqlQuery = {
     query: `query getDish($id: ID!) {
@@ -81,7 +88,7 @@ const getDish = async ({ id }, state) => {
   }
 }
 
-const createDish = async ({ name, description, price }, state) => {
+const createDish = async ({ name, description, price }) => {
   const graphqlQuery = {
     query: `
       mutation createDish($name: String!, $description: String, $price: Int!) {
@@ -93,7 +100,7 @@ const createDish = async ({ name, description, price }, state) => {
         }
       }
     `,
-    variables: { name, description, price }
+    variables: { name, description, price: +price }
   }
 
   const response = await doFetch(graphqlQuery)
@@ -108,7 +115,43 @@ const createDish = async ({ name, description, price }, state) => {
   }
 }
 
-const getDishes = async ({ page = 0 }, state) => {
+const deleteDish = async ({ id }) => {
+  const graphqlQuery = {
+    query: `
+      mutation deleteDish($id: ID!) {
+        deleteDish(id: $id)
+      }
+    `,
+    variables: { id }
+  }
+
+  await doFetch(graphqlQuery)
+
+  return {
+    ...state,
+    dishes: state.dishes.filter(({ _id }) => _id !== id)
+  }
+}
+
+const deleteDishes = async ({ ids }) => {
+  const graphqlQuery = {
+    query: `
+      mutation deleteDishes($ids: [ID!]!) {
+        deleteDishes(ids: $ids)
+      }
+    `,
+    variables: { ids }
+  }
+
+  await doFetch(graphqlQuery)
+
+  return {
+    ...state,
+    dishes: state.dishes.filter(({ _id }) => !ids.find(removed_id => removed_id === _id))
+  }
+}
+
+const getDishes = async ({ page = 0 }) => {
 
   const graphqlQuery = {
     query: `query getDishes($page: Int!) {

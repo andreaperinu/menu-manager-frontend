@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import Paper from '@material-ui/core/Paper'
 import TableContainer from '@material-ui/core/TableContainer'
@@ -13,13 +13,15 @@ import useStyles from './EnhancedTableStyles'
 import EnhancedTableToolbar from './EnhancedTableToolbar/EnhancedTableToolbar'
 import EnhancedTableHead from './EnhancedTableHead/EnhancedTableHead'
 
-const EnhancedTable = ({ title, rows }) => {
+const EnhancedTable = ({ title, rows, action, bulkAction }) => {
 
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  useEffect(() => { setSelected([]) }, [rows])
 
   const classes = useStyles()
 
@@ -92,7 +94,12 @@ const EnhancedTable = ({ title, rows }) => {
     <div className={classes.Root}>
       <Paper className={classes.Paper}>
 
-        <EnhancedTableToolbar title={title} numSelected={selected.length} />
+        <EnhancedTableToolbar
+          selected={selected}
+          title={title} numSelected={selected.length}
+          action={action}
+          bulkAction={bulkAction}
+        />
 
         <TableContainer>
           <Table

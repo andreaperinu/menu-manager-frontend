@@ -10,8 +10,12 @@ import classNames from 'classnames'
 
 import useStyles from './EnhancedTableToolbarStyles'
 
-const EnhancedTableToolbar = ({ title, numSelected }) => {
+const EnhancedTableToolbar = ({ title, selected, action, bulkAction }) => {
   const classes = useStyles()
+
+  const numSelected = selected.length
+
+  const onClickHandler = () => numSelected > 1 ? bulkAction(selected) : action(selected[0])
 
   return (
     <Toolbar className={classNames(classes.root, { [classes.highlight]: numSelected > 0 })}>
@@ -29,7 +33,7 @@ const EnhancedTableToolbar = ({ title, numSelected }) => {
       {
         numSelected > 0 ?
           <Tooltip title="Delete">
-            <IconButton aria-label="delete">
+            <IconButton aria-label="delete" onClick={onClickHandler}>
               <DeleteIcon />
             </IconButton>
           </Tooltip>
