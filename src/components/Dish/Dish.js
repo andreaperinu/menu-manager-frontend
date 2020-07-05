@@ -1,107 +1,122 @@
 import React, { useEffect, useState } from "react";
 
-import Grid from "@material-ui/core/Grid";
-import FormGroup from "@material-ui/core/FormGroup";
-import TextField from "@material-ui/core/TextField";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
+import { Table, Button, Row, Col, Form, Input, InputNumber } from 'antd';
 
-import EnhancedTable from "../EnhancedTable/EnhancedTable";
-import useStyles from "./DishStyles";
 import { A, useStore } from "../../store";
 
 const Dish = ({ dishes, getDishes }) => {
   const dispatch = useStore(false)[1];
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState('');
-  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(false)
+  const [selectedDishes, setSelectedDishes] = useState([])
+
+  const [form] = Form.useForm()
 
   useEffect(() => {
-    getDishes({ page });
-  }, [page, getDishes]);
+    getDishes({ page: 0 });
+  }, [getDishes]);
 
   useEffect(() => {
-    setName('')
-    setDescription('')
-    setPrice('')
+    setLoading(false)
+    setSelectedDishes([])
   }, [dishes])
 
-  const onSubmitHandler = (e) => {
-    e.preventDefault();
-    dispatch(A.CREATE_DISH, { name, description, price });
+  const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
   };
 
-  const classes = useStyles();
+  const tailLayout = {
+    wrapperCol: { offset: 8, span: 16 },
+  };
+
+  const onSelectDishes = selected => setSelectedDishes(selected)
+
+  const onFinishHandler = payload => {
+    dispatch(A.CREATE_DISH, payload)
+    form.resetFields()
+  }
+
+  const onDeleteHandler = () => {
+    setLoading(true)
+
+    selectedDishes.length > 1 ?
+      dispatch(A.DELETE_DISHES, { ids: selectedDishes })
+      :
+      dispatch(A.DELETE_DISH, { id: selectedDishes[0] })
+  }
+
+  const columns = [
+    { title: 'Name', dataIndex: 'name' },
+    { title: 'Description', dataIndex: 'description' },
+    { title: 'Price', dataIndex: 'price' },
+  ]
+
+  const formattedDishes = dishes.map(({ _id, name, description, price }) => (
+    { key: _id, name, description, price }
+  ))
+
+  const hasSelected = selectedDishes.length > 0
 
   return (
-    <Grid container alignItems="flex-start">
-      <Grid item xs={12} lg={4}>
-        <Box m={3}>
-          <Paper className={classes.Paper}>
-            <Typography
-              className={classes.title}
-              variant="h6"
-              id="tableTitle"
-              component="div"
-            >
-              Create a Dish
-            </Typography>
+    <Row>
+      <Col xs={24} /* lg={8} */>
 
-            <form onSubmit={onSubmitHandler}>
-              <FormGroup>
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Name"
-                    value={name}
-                    onChange={({ target: { value } }) => setName(value)}
-                  />
-                </Grid>
+        <Form {...layout} form={form} name="dishForm" onFinish={onFinishHandler}>
 
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Description"
-                    value={description}
-                    onChange={({ target: { value } }) => setDescription(value)}
-                  />
-                </Grid>
+          <Form.Item
+            label="Name" name="name"
+            rules={[{ required: true, message: 'Please name your dish' }]}
+          >
+            <Input />
+          </Form.Item>
 
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Price"
-                    value={price}
-                    onChange={({ target: { value } }) => setPrice(value)}
-                  />
-                </Grid>
-              </FormGroup>
+          <Form.Item label="Description" name="description">
+            <Input />
+          </Form.Item>
 
-              <Grid item style={{ marginTop: 16 }}>
-                <Button variant="contained" type="submit">
-                  Create
-                </Button>
-              </Grid>
-            </form>
-          </Paper>
-        </Box>
-      </Grid>
+          <Form.Item
+            label="Price" name="price"
+            rules={[{ required: true, message: 'Please insert a price' }]}
+          >
+            <InputNumber />
+          </Form.Item>
 
-      <Grid item xs={12} lg={8}>
-        <Box m={3}>
-          <EnhancedTable
-            title="Dishes" rows={dishes}
-            action={id => dispatch(A.DELETE_DISH, { id })}
-            bulkAction={ids => dispatch(A.DELETE_DISHES, { ids })}
-          />
-        </Box>
-      </Grid>
+          <Form.Item {...tailLayout}>
+            <Button type="primary" htmlType="submit">
+              Create
+            </Button>
+          </Form.Item>
 
-    </Grid>
+        </Form>
+
+      </Col>
+
+      <Col xs={24} /* lg={16} */>
+
+        <div style={{ marginBottom: 16 }}>
+
+          <Button
+            type="primary" onClick={onDeleteHandler} loading={loading}
+            disabled={!hasSelected}
+          >
+            Delete
+          </Button>
+
+          <span style={{ marginLeft: 8 }}>
+            {hasSelected ? `Selected ${selectedDishes.length} items` : ''}
+          </span>
+
+        </div>
+
+        <Table
+          rowSelection={{ selectedRowKeys: selectedDishes, onChange: onSelectDishes }}
+          columns={columns} dataSource={formattedDishes}
+        />
+      </Col>
+
+    </Row>
+
   );
 };
 
