@@ -1,123 +1,107 @@
 import React, { useEffect, useState } from "react";
 
-import { Table, Button, Row, Col, Form, Input, InputNumber } from 'antd';
+import { Table, Button, Row, Col, Form } from 'antd';
 
-import { A, useStore } from "../../store";
+import { A, useStore } from "../../store/store";
+import DishFormFields from "./DishFormFields/DishFormFields";
 
 const Dish = ({ dishes, getDishes }) => {
-  const dispatch = useStore(false)[1];
+	const dispatch = useStore(false)[1];
 
-  const [loading, setLoading] = useState(false)
-  const [selectedDishes, setSelectedDishes] = useState([])
+	const [loading, setLoading] = useState(false)
+	const [selectedDishes, setSelectedDishes] = useState([])
 
-  const [form] = Form.useForm()
+	const [form] = Form.useForm()
 
-  useEffect(() => {
-    getDishes({ page: 0 });
-  }, [getDishes]);
+	useEffect(() => {
+		getDishes({ page: 0 });
+	}, [getDishes]);
 
-  useEffect(() => {
-    setLoading(false)
-    setSelectedDishes([])
-  }, [dishes])
+	useEffect(() => {
+		setLoading(false)
+		setSelectedDishes([])
+	}, [dishes])
 
-  const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-  };
 
-  const tailLayout = {
-    wrapperCol: { offset: 8, span: 16 },
-  };
+	const onFinishHandler = payload => {
+		dispatch(A.CREATE_DISH, payload)
+		form.resetFields()
+	}
 
-  const onSelectDishes = selected => setSelectedDishes(selected)
+	const onSelectDishes = selected => setSelectedDishes(selected)
 
-  const onFinishHandler = payload => {
-    dispatch(A.CREATE_DISH, payload)
-    form.resetFields()
-  }
+	const onDeleteHandler = () => {
+		setLoading(true)
 
-  const onDeleteHandler = () => {
-    setLoading(true)
+		selectedDishes.length > 1 ?
+			dispatch(A.DELETE_DISHES, { ids: selectedDishes })
+			:
+			dispatch(A.DELETE_DISH, { id: selectedDishes[0] })
+	}
 
-    selectedDishes.length > 1 ?
-      dispatch(A.DELETE_DISHES, { ids: selectedDishes })
-      :
-      dispatch(A.DELETE_DISH, { id: selectedDishes[0] })
-  }
+	const columns = [
+		{ title: 'Name', dataIndex: 'name' },
+		{ title: 'Description', dataIndex: 'description' },
+		{ title: 'Price', dataIndex: 'price' },
+	]
 
-  const columns = [
-    { title: 'Name', dataIndex: 'name' },
-    { title: 'Description', dataIndex: 'description' },
-    { title: 'Price', dataIndex: 'price' },
-  ]
+	const layout = {
+		labelCol: { span: 8 },
+		wrapperCol: { span: 16 },
+	};
 
-  const formattedDishes = dishes.map(({ _id, name, description, price }) => (
-    { key: _id, name, description, price }
-  ))
+	const tailLayout = {
+		wrapperCol: { offset: 8, span: 16 },
+	};
 
-  const hasSelected = selectedDishes.length > 0
+	const formattedDishes = dishes.map(({ _id, name, description, price }) => (
+		{ key: _id, name, description, price }
+	))
 
-  return (
-    <Row>
-      <Col xs={24} /* lg={8} */>
+	const hasSelected = selectedDishes.length > 0
 
-        <Form {...layout} form={form} name="dishForm" onFinish={onFinishHandler}>
+	return (
+		<Row gutter={[32, 0]}>
 
-          <Form.Item
-            label="Name" name="name"
-            rules={[{ required: true, message: 'Please name your dish' }]}
-          >
-            <Input />
-          </Form.Item>
+			<Col xs={24} lg={8}>
+				<Form {...layout} form={form} name="dishForm" onFinish={onFinishHandler}>
 
-          <Form.Item label="Description" name="description">
-            <Input />
-          </Form.Item>
+					<DishFormFields />
 
-          <Form.Item
-            label="Price" name="price"
-            rules={[{ required: true, message: 'Please insert a price' }]}
-          >
-            <InputNumber />
-          </Form.Item>
+					<Form.Item {...tailLayout}>
+						<Button type="primary" htmlType="submit">
+							Create
+        		</Button>
+					</Form.Item>
 
-          <Form.Item {...tailLayout}>
-            <Button type="primary" htmlType="submit">
-              Create
-            </Button>
-          </Form.Item>
+				</Form>
+			</Col>
 
-        </Form>
+			<Col xs={24} lg={16}>
 
-      </Col>
+				<div style={{ marginBottom: 16 }}>
 
-      <Col xs={24} /* lg={16} */>
+					<Button
+						type="primary" onClick={onDeleteHandler} loading={loading}
+						disabled={!hasSelected}
+					>
+						Delete
+					</Button>
 
-        <div style={{ marginBottom: 16 }}>
+					<span style={{ marginLeft: 8 }}>
+						{hasSelected ? `Selected ${selectedDishes.length} items` : ''}
+					</span>
 
-          <Button
-            type="primary" onClick={onDeleteHandler} loading={loading}
-            disabled={!hasSelected}
-          >
-            Delete
-          </Button>
+				</div>
 
-          <span style={{ marginLeft: 8 }}>
-            {hasSelected ? `Selected ${selectedDishes.length} items` : ''}
-          </span>
+				<Table
+					rowSelection={{ selectedRowKeys: selectedDishes, onChange: onSelectDishes }}
+					columns={columns} dataSource={formattedDishes}
+				/>
+			</Col>
 
-        </div>
-
-        <Table
-          rowSelection={{ selectedRowKeys: selectedDishes, onChange: onSelectDishes }}
-          columns={columns} dataSource={formattedDishes}
-        />
-      </Col>
-
-    </Row>
-
-  );
+		</Row>
+	);
 };
 
 export default Dish;

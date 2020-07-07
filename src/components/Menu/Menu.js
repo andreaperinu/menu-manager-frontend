@@ -1,112 +1,116 @@
-/* import React, { useEffect, useState } from "react";
+import React, { useEffect } from 'react'
 
-import Grid from "@material-ui/core/Grid";
-import FormGroup from "@material-ui/core/FormGroup";
-import TextField from "@material-ui/core/TextField";
-import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
+import { Row, Col, List, Collapse, Form, Button, Input } from 'antd'
 
-import EnhancedTable from "../EnhancedTable/EnhancedTable";
-import useStyles from "./DishStyles";
-import { A, useStore } from "../../store";
+import DynamicSubMenu from '../DynamicSubMenu/DynamicSubMenu'
 
-const Menu = ({ menus, getMenus }) => {
-  const dispatch = useStore(false)[1];
+const Menu = ({ menus, dishes, getMenus }) => {
 
-  const [menuName, setMenuName] = useState('');
-  const [subMenus, setSubMenus] = useState([]);
-  const [price, setPrice] = useState('');
-  const [page, setPage] = useState(0);
+	useEffect(() => {
+		getMenus({ page: 0 });
+	}, [getMenus]);
 
-  useEffect(() => {
-    getMenus({ page });
-  }, [page, getMenus]);
+	useEffect(() => {
+		console.log(menus)
+	}, [menus])
 
-  useEffect(() => {
-    setMenuName('')
-    setSubMenus([])
-  }, [menus])
+	const callback = key => console.log(key)
 
-  const onSubmitHandler = (e) => {
-    e.preventDefault();
-    // dispatch(A.CREATE_DISH, { name, description, price });
-  };
+	const formItemLayout = {
+		labelCol: {
+			xs: { span: 24 },
+			sm: { span: 4 },
+		},
+		wrapperCol: {
+			xs: { span: 24 },
+			sm: { span: 20 },
+		},
+	}
 
-  const classes = useStyles();
+	// const layout = {
+	// 	labelCol: { span: 8 },
+	// 	wrapperCol: { span: 16 },
+	// };
 
-  return (
-    <Grid container alignItems="flex-start">
-      <Grid item xs={12} lg={4}>
+	const formItemLayoutWithOutLabel = {
+		wrapperCol: {
+			xs: { span: 24, offset: 0 },
+			sm: { span: 20, offset: 4 },
+		},
+	};
 
-        <Box m={3}>
-          <Paper className={classes.Paper}>
-            <Typography
-              className={classes.title}
-              variant="h6"
-              id="tableTitle"
-              component="div"
-            >
-              Create a Menu
-            </Typography>
+	const onFinish = values => {
+		console.log('Received values of form:', values);
+	};
 
-            <form onSubmit={onSubmitHandler}>
-              <FormGroup>
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Name"
-                    value={name}
-                    required
-                    onChange={({ target: { value } }) => setName(value)}
-                  />
-                </Grid>
+	return (
+		<Row gutter={[32, 16]}>
 
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Description"
-                    value={description}
-                    required
-                    onChange={({ target: { value } }) => setDescription(value)}
-                  />
-                </Grid>
+			<Col xs={24}/*  lg={8} */>
+				{/* <DishForm /> */}
 
-                <Grid item xs={12}>
-                  <TextField
-                    className={classes.Field}
-                    label="Price"
-                    value={price}
-                    required
-                    onChange={({ target: { value } }) => setPrice(value)}
-                  />
-                </Grid>
-              </FormGroup>
+				<Form name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
 
-              <Grid item style={{ marginTop: 16 }}>
-                <Button variant="contained" type="submit">
-                  Create
-                </Button>
-              </Grid>
-            </form>
-          </Paper>
-        </Box>
-      </Grid>
+					<Form.Item
+						label="Menu name" name="menuName"
+						rules={[{ required: true, message: 'Please name your menu' }]}
+						{...formItemLayout}
+					>
+						<Input />
+					</Form.Item>
 
-      <Grid item xs={12} lg={8}>
-        <Box m={3}>
-          <EnhancedTable
-            title="Dishes" rows={dishes}
-            action={id => dispatch(A.DELETE_DISH, { id })}
-            bulkAction={ids => dispatch(A.DELETE_DISHES, { ids })}
-          />
-        </Box>
-      </Grid>
+					<DynamicSubMenu
+						label="boh" name="boh" error="Please name your submenu"
+						formItemLayoutWithOutLabel={formItemLayoutWithOutLabel}
+						formItemLayout={formItemLayout} addLabel="Add a submenu"
+					/>
 
-    </Grid>
-  );
-};
+					<Form.Item>
+						<Button type="primary" htmlType="submit">
+							Submit
+						</Button>
+					</Form.Item>
 
-export default Menu;
- */
+				</Form>
+			</Col>
+
+			<Col xs={24}/*  lg={16} */>
+
+				<Collapse defaultActiveKey={['1']} onChange={callback} accordion>
+					{
+						menus.map(menu => (
+							<Collapse.Panel header={menu.name} key={menu._id}>
+
+								<Collapse>
+									{
+										menu.items.map(subMenu => (
+											<Collapse.Panel header={subMenu.name} key={subMenu._id}>
+
+												<List
+													itemLayout="horizontal"
+													dataSource={subMenu.items}
+													renderItem={dish => (
+														<List.Item>
+															<List.Item.Meta title={dish.name} description={dish.description} />
+															<div>{dish.price}</div>
+														</List.Item>
+													)}
+												/>
+
+											</Collapse.Panel>
+										))
+									}
+								</Collapse>
+
+							</Collapse.Panel>
+						))
+					}
+				</Collapse>
+
+			</Col>
+
+		</Row >
+	)
+}
+
+export default Menu
