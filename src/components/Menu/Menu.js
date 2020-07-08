@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 
-import { Row, Col, List, Collapse, Form, Button, Input } from 'antd'
-
-import DynamicSubMenu from '../DynamicSubMenu/DynamicSubMenu'
+import { Row, Col, List, Collapse } from 'antd'
+import MenuForm from './MenuForm/MenuForm';
 
 const Menu = ({ menus, dishes, getMenus }) => {
 
@@ -14,34 +13,11 @@ const Menu = ({ menus, dishes, getMenus }) => {
 		console.log(menus)
 	}, [menus])
 
-	const callback = key => console.log(key)
-
-	const formItemLayout = {
-		labelCol: {
-			xs: { span: 24 },
-			sm: { span: 4 },
-		},
-		wrapperCol: {
-			xs: { span: 24 },
-			sm: { span: 20 },
-		},
+	const onCreateMenuHandler = (data) => {
+		console.log(data)
 	}
 
-	// const layout = {
-	// 	labelCol: { span: 8 },
-	// 	wrapperCol: { span: 16 },
-	// };
-
-	const formItemLayoutWithOutLabel = {
-		wrapperCol: {
-			xs: { span: 24, offset: 0 },
-			sm: { span: 20, offset: 4 },
-		},
-	};
-
-	const onFinish = values => {
-		console.log('Received values of form:', values);
-	};
+	const callback = key => console.log(key)
 
 	return (
 		<Row gutter={[32, 16]}>
@@ -49,29 +25,8 @@ const Menu = ({ menus, dishes, getMenus }) => {
 			<Col xs={24}/*  lg={8} */>
 				{/* <DishForm /> */}
 
-				<Form name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
-
-					<Form.Item
-						label="Menu name" name="menuName"
-						rules={[{ required: true, message: 'Please name your menu' }]}
-						{...formItemLayout}
-					>
-						<Input />
-					</Form.Item>
-
-					<DynamicSubMenu
-						label="boh" name="boh" error="Please name your submenu"
-						formItemLayoutWithOutLabel={formItemLayoutWithOutLabel}
-						formItemLayout={formItemLayout} addLabel="Add a submenu"
-					/>
-
-					<Form.Item>
-						<Button type="primary" htmlType="submit">
-							Submit
-						</Button>
-					</Form.Item>
-
-				</Form>
+				<MenuForm dishes={dishes} onCreateMenu={onCreateMenuHandler} />
+				
 			</Col>
 
 			<Col xs={24}/*  lg={16} */>
