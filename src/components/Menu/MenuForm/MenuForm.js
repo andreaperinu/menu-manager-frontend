@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-import { Form, Button, Input, Row, Col } from 'antd'
+import { Form, Button, Input, Modal } from 'antd'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import TableTransfer from '../../TableTransfer/TableTransfer'
 import {
@@ -9,24 +9,44 @@ import {
   tableColumns,
 } from './menuConfig'
 
-const MenuForm = ({ dishes, onCreateMenu }) => {
+const MenuForm = ({ dishes, onCreateMenu, closeForm }) => {
+
   const [transferData, setTransferData] = useState([])
+  const [form] = Form.useForm()
 
   const onFinish = ({ menuName, submenuNames }) => {
     const menu = {
       name: menuName,
-      items: transferData.map((dishIds, idx) => ({
-        name: submenuNames[idx],
-        items: dishes.filter(({ _id }) => dishIds.find((__id) => __id === _id))
+      items: submenuNames.map((submenuName, idx) => ({
+        name: submenuName,
+        items: transferData[idx] ?
+          dishes.filter(({ _id }) => transferData[idx].find((__id) => __id === _id))
+          :
+          []
       }))
     }
 
+    const dishesNotFullfilled = !menu.items.length || menu.items.some(submenu => !submenu.items.length)
+    if (dishesNotFullfilled) {
+      Modal.info({
+        title: 'Form error',
+        content: <p>Please fill your dishes!</p>,
+        onOk() { },
+      });
+      return
+    }
+
     onCreateMenu(menu)
+    form.resetFields()
     setTransferData([])
   };
 
   return (
-    <Form name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
+    <Form
+      name="dynamic_form_item" {...formItemLayoutWithOutLabel}
+      initialValues={{ submenuNames: [""] }} onFinish={onFinish}
+      form={form}
+    >
 
       <Form.Item
         label="Menu name" name="menuName" {...formItemLayout}
@@ -69,6 +89,9 @@ const MenuForm = ({ dishes, onCreateMenu }) => {
                         prev[index] = nextTargetKeys
                         return [...prev]
                       })}
+                      filterOption={(inputValue, item) =>
+                        item.name.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1
+                      }
                     />
 
                     {
@@ -94,9 +117,8 @@ const MenuForm = ({ dishes, onCreateMenu }) => {
       </Form.List>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Submit
-        </Button>
+        <Button type="primary" htmlType="submit">Submit</Button>
+        <Button type="primary" onClick={closeForm} style={{ marginLeft: '.5rem' }}>Cancel</Button>
       </Form.Item>
 
     </Form>

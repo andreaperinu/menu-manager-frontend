@@ -1,4 +1,4 @@
-import { doFetch } from "./store";
+import { doFetch } from "./store"
 
 export const getDish = async ({ id }, state) => {
   const graphqlQuery = {
@@ -12,12 +12,10 @@ export const getDish = async ({ id }, state) => {
       		}
     	`,
     variables: { id }
-  };
+  }
 
   const response = await doFetch(graphqlQuery)
-  const {
-    data: { dish }
-  } = response
+  const { data: { dish } } = response
 
   return {
     ...state,
@@ -44,11 +42,7 @@ export const getDishes = async ({ page = 0 }, state) => {
   }
 
   const response = await doFetch(graphqlQuery)
-  const {
-    data: {
-      dishes: { items }
-    }
-  } = response
+  const { data: { dishes: { items } } } = response
 
   return {
     ...state,
@@ -68,19 +62,17 @@ export const createDish = async ({ name, description, price }, state) => {
 				}
 			}
 		`,
-    variables: { name, description, price: +price },
-  };
+    variables: { name, description, price: +price }
+  }
 
-  const response = await doFetch(graphqlQuery);
-  const {
-    data: { createDish: createdDish },
-  } = response;
+  const response = await doFetch(graphqlQuery)
+  const { data: { createDish: createdDish } } = response
 
   return {
     ...state,
-    dishes: [...state.dishes, createdDish],
-  };
-};
+    dishes: [...state.dishes, createdDish]
+  }
+}
 
 export const deleteDish = async ({ id }, state) => {
   const graphqlQuery = {
@@ -88,17 +80,17 @@ export const deleteDish = async ({ id }, state) => {
 			mutation deleteDish($id: ID!) {
 				deleteDish(id: $id)
 			}
-    	`,
-    variables: { id },
-  };
+    `,
+    variables: { id }
+  }
 
-  await doFetch(graphqlQuery);
+  await doFetch(graphqlQuery)
 
   return {
     ...state,
-    dishes: state.dishes.filter(({ _id }) => _id !== id),
-  };
-};
+    dishes: state.dishes.filter(({ _id }) => _id !== id)
+  }
+}
 
 export const deleteDishes = async ({ ids }, state) => {
   const graphqlQuery = {
@@ -107,15 +99,15 @@ export const deleteDishes = async ({ ids }, state) => {
 				deleteDishes(ids: $ids)
 			}
 		`,
-    variables: { ids },
-  };
+    variables: { ids }
+  }
 
-  await doFetch(graphqlQuery);
+  await doFetch(graphqlQuery)
 
   return {
     ...state,
     dishes: state.dishes.filter(
       ({ _id }) => !ids.find((removed_id) => removed_id === _id)
-    ),
-  };
-};
+    )
+  }
+}

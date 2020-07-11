@@ -60,7 +60,7 @@ export const createMenu = async ({ name, items }, state) => {
 			}
 		`,
 		variables: { name, items }
-	};
+	}
 
 	const response = await doFetch(graphqlQuery)
 	const { data: { createMenu: createdMenu } } = response
@@ -68,5 +68,23 @@ export const createMenu = async ({ name, items }, state) => {
 	return {
 		...state,
 		menus: [...state.menus, createdMenu],
+	}
+}
+
+export const deleteMenu = async ({ id }, state) => {
+	const graphqlQuery = {
+		query: `
+			mutation deleteMenu($id: ID!) {
+				deleteMenu(id: $id)
+			}
+		`,
+		variables: { id },
+	}
+
+	await doFetch(graphqlQuery)
+
+	return {
+		...state,
+		menus: state.menus.filter(({ _id }) => _id !== id)
 	}
 }

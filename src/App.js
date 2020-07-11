@@ -14,13 +14,13 @@ const App = () => {
 	const getDishes = useCallback(({ page }) => dispatch(A.GET_DISHES, { page }), [dispatch])
 	const getMenus = useCallback(({ page }) => dispatch(A.GET_MENUS, { page }), [dispatch])
 
-	const { menus, dishes } = state
+	const { menus, dishes, loadingMenus } = state
 
 	return (
 		<>
 			<h1 className={styles.Title}>Create your menu</h1>
 
-			<h3>You can create your menu by writing it down from scratch or using previously created dishes</h3>
+			<h3>Create your own, customizable menu by saving your preferite Dishes. Then start to compose them!</h3>
 
 			<Tabs defaultActiveKey="1" onChange={key => console.log(key)}>
 
@@ -29,7 +29,7 @@ const App = () => {
 				</Tabs.TabPane>
 
 				<Tabs.TabPane tab="Menu" key="2">
-					<Menu getMenus={getMenus} menus={menus} dishes={dishes} />
+					<Menu getMenus={getMenus} menus={menus} dishes={dishes} loadingMenus={loadingMenus} />
 				</Tabs.TabPane>
 
 			</Tabs>
