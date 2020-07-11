@@ -35,3 +35,38 @@ export const getMenus = async ({ page }, state) => {
 		menus: items
 	}
 }
+
+export const createMenu = async ({ name, items }, state) => {
+	const graphqlQuery = {
+		query: `
+			mutation createMenu($name: String!, $items: [SubMenuInputData!]!) {
+				createMenu(data: {
+					name: $name,
+					items: $items
+				}) {
+					_id
+					name
+					items {
+						_id
+						name
+						items {
+							_id
+							name
+							description
+							price
+						}
+					}
+				}
+			}
+		`,
+		variables: { name, items }
+	};
+
+	const response = await doFetch(graphqlQuery)
+	const { data: { createMenu: createdMenu } } = response
+
+	return {
+		...state,
+		menus: [...state.menus, createdMenu],
+	}
+}

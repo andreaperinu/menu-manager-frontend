@@ -1,48 +1,36 @@
 import React, { useState } from 'react'
 
-import { Form, Button, Input } from 'antd';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import TableTransfer from '../../TableTransfer/TableTransfer';
-import { formItemLayoutWithOutLabel, formItemLayout, tableColumns } from './menuConfig';
+import { Form, Button, Input, Row, Col } from 'antd'
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import TableTransfer from '../../TableTransfer/TableTransfer'
+import {
+  formItemLayoutWithOutLabel,
+  formItemLayout,
+  tableColumns,
+} from './menuConfig'
 
 const MenuForm = ({ dishes, onCreateMenu }) => {
-
   const [transferData, setTransferData] = useState([])
 
   const onFinish = ({ menuName, submenuNames }) => {
-
     const menu = {
       name: menuName,
-      items: submenuNames.map((subMenuName, idx) => ({
-        name: subMenuName,
-        items: dishes.map(({ _id }) => transferData[idx].find(__id => __id === _id))
+      items: transferData.map((dishIds, idx) => ({
+        name: submenuNames[idx],
+        items: dishes.filter(({ _id }) => dishIds.find((__id) => __id === _id))
       }))
     }
 
-    console.log('menu', menu)
-
-
-    // console.log(values)
-    // const dishes = dishes.map(({_id}) => )
-    // const menu = {
-
-    // }
-    // values => onCreateMenu(values, [...transferData])
-
-
-    // state.dishes.filter(({ _id }) => !ids.find(removed_id => removed_id === _id))
-  }
+    onCreateMenu(menu)
+    setTransferData([])
+  };
 
   return (
-    <Form
-      name="dynamic_form_item" {...formItemLayoutWithOutLabel}
-      onFinish={onFinish}
-    >
+    <Form name="dynamic_form_item" {...formItemLayoutWithOutLabel} onFinish={onFinish}>
 
       <Form.Item
-        label="Menu name" name="menuName"
+        label="Menu name" name="menuName" {...formItemLayout}
         rules={[{ required: true, message: 'Please name your menu' }]}
-        {...formItemLayout}
       >
         <Input />
       </Form.Item>
@@ -55,68 +43,48 @@ const MenuForm = ({ dishes, onCreateMenu }) => {
                 fields.map((field, index) => (
                   <Form.Item
                     {...(index === 0 ? formItemLayout : formItemLayoutWithOutLabel)}
-                    label={index === 0 ? 'Submenus' : ''}
-                    required={true}
-                    key={field.key}
+                    label={index === 0 ? 'Submenus' : ''} required={true} key={field.key}
                   >
                     <Form.Item
-                      {...field}
-                      validateTrigger={['onChange', 'onBlur']}
+                      {...field} validateTrigger={['onChange', 'onBlur']} noStyle
                       rules={[
                         {
                           required: true,
                           whitespace: true,
-                          message: 'Please name your submenu',
-                        },
+                          message: 'Please name your submenu'
+                        }
                       ]}
-                      noStyle
                     >
-
                       <Input placeholder="Submenu name" style={{ width: '100%' }} />
-
                     </Form.Item>
 
                     <TableTransfer
-                      name="transfer"
+                      style={{ marginTop: '1rem' }}
+                      name="transfer" leftColumns={tableColumns} rightColumns={tableColumns}
                       dataSource={dishes.map(({ _id, name, description, price }) => ({
                         key: _id, name, description, price
                       }))}
-                      targetKeys={transferData[index]}
-                      disabled={false}
-                      showSearch={true}
+                      targetKeys={transferData[index]} disabled={false} showSearch={true}
                       onChange={nextTargetKeys => setTransferData(prev => {
                         prev[index] = nextTargetKeys
                         return [...prev]
                       })}
-                      filterOption={(inputValue, item) =>
-                        item.title.indexOf(inputValue) !== -1 || item.tag.indexOf(inputValue) !== -1
-                      }
-                      leftColumns={tableColumns}
-                      rightColumns={tableColumns}
                     />
 
                     {
-                      fields.length > 1 ?
+                      fields.length > 1 && (
                         <MinusCircleOutlined
-                          className="dynamic-delete-button"
-                          style={{ margin: '0 8px' }}
+                          className="dynamic-delete-button" style={{ margin: '0 8px' }}
                           onClick={() => remove(field.name)}
                         />
-                        :
-                        null
+                      )
                     }
                   </Form.Item>
                 ))
               }
 
               <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    add();
-                  }}
-                  style={{ width: '100%' }}
-                >
+                <Button type="dashed" onClick={() => { add() }} style={{ width: '100%' }}>
                   <PlusOutlined /> Add a submenu
                 </Button>
               </Form.Item>
@@ -128,7 +96,7 @@ const MenuForm = ({ dishes, onCreateMenu }) => {
       <Form.Item>
         <Button type="primary" htmlType="submit">
           Submit
-						</Button>
+        </Button>
       </Form.Item>
 
     </Form>
