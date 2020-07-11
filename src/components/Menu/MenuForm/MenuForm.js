@@ -20,7 +20,9 @@ const MenuForm = ({ dishes, onCreateMenu, closeForm }) => {
       items: submenuNames.map((submenuName, idx) => ({
         name: submenuName,
         items: transferData[idx] ?
-          dishes.filter(({ _id }) => transferData[idx].find((__id) => __id === _id))
+          dishes
+            .filter(({ _id }) => transferData[idx].find((__id) => __id === _id))
+            .map(({ name, description, price }) => ({ name, description, price }))
           :
           []
       }))

@@ -6,7 +6,6 @@ import 'antd/dist/antd.css'
 import Dish from './components/Dish/Dish'
 import Menu from './components/Menu/Menu'
 import { A, useStore } from "./store/store";
-import styles from './App.module.css'
 
 const App = () => {
 	const [state, dispatch] = useStore();
@@ -18,7 +17,7 @@ const App = () => {
 
 	return (
 		<>
-			<h1 className={styles.Title}>Create your menu</h1>
+			<h1 style={{ textAlign: 'center' }}>Menu manager</h1>
 
 			<h3>Create your own, customizable menu by saving your preferite Dishes. Then start to compose them!</h3>
 
