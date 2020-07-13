@@ -74,6 +74,30 @@ export const createDish = async ({ name, description, price }, state) => {
   }
 }
 
+export const editDish = async ({ id, description, price }, state) => {
+  const graphqlQuery = {
+    query: `
+      mutation editDish($id: ID!, $description: String, $price: Int!) {
+        editDish(data: { id: $id, description: $description, price: $price }) {
+          _id
+          name
+          description
+          price
+        }
+      }
+    `,
+    variables: { id, description, price: +price }
+  }
+
+  const response = await doFetch(graphqlQuery)
+  const { data: { editDish: editedDish } } = response
+
+  return {
+    ...state,
+    dishes: state.dishes.map(dish => dish._id === editedDish._id ? editedDish : dish)
+  }
+}
+
 export const deleteDish = async ({ id }, state) => {
   const graphqlQuery = {
     query: `

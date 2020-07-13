@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react"
 
-import { getDish, getDishes, createDish, deleteDish, deleteDishes } from "./dish"
+import { getDish, getDishes, createDish, deleteDish, deleteDishes, editDish } from "./dish"
 import { getMenus, createMenu, deleteMenu } from "./menu"
 
 let state = {
@@ -15,6 +15,7 @@ export const A = {
   GET_DISH: "GET_DISH",
   GET_DISHES: "GET_DISHES",
   CREATE_DISH: "CREATE_DISH",
+  EDIT_DISH: 'EDIT_DISH',
   DELETE_DISH: "DELETE_DISH",
   DELETE_DISHES: "DELETE_DISHES",
   GET_MENUS: "GET_MENUS",
@@ -27,6 +28,7 @@ const updatedState = async (action, payload) => {
     case A.GET_DISH: return await getDish(payload, state)
     case A.GET_DISHES: return await getDishes(payload, state)
     case A.CREATE_DISH: return await createDish(payload, state)
+    case A.EDIT_DISH: return await editDish(payload, state)
     case A.DELETE_DISH: return await deleteDish(payload, state)
     case A.DELETE_DISHES: return await deleteDishes(payload, state)
     case A.GET_MENUS: return await getMenus(payload, state)

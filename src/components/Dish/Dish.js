@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
 
-import { Table, Button, Row, Col, Form } from 'antd';
+import { Button, Row, Col, Form } from 'antd'
 
-import { A, useStore } from "../../store/store";
-import DishFormFields from "./DishFormFields/DishFormFields";
+import { A, useStore } from "../../store/store"
+import DishFormFields from "./DishFormFields/DishFormFields"
+import EditableTable from "./EditableTable/EditableTable"
 
 const Dish = ({ dishes, getDishes }) => {
-	const dispatch = useStore(false)[1];
+	const dispatch = useStore(false)[1]
 
 	const [loading, setLoading] = useState(false)
 	const [selectedDishes, setSelectedDishes] = useState([])
 
 	const [form] = Form.useForm()
 
-	useEffect(() => {
-		getDishes({ page: 0 });
-	}, [getDishes]);
+	useEffect(() => { getDishes({ page: 0 }) }, [getDishes])
 
 	useEffect(() => {
 		setLoading(false)
@@ -39,20 +38,14 @@ const Dish = ({ dishes, getDishes }) => {
 			dispatch(A.DELETE_DISH, { id: selectedDishes[0] })
 	}
 
-	const columns = [
-		{ title: 'Name', dataIndex: 'name' },
-		{ title: 'Description', dataIndex: 'description' },
-		{ title: 'Price', dataIndex: 'price' },
-	]
+
 
 	const layout = {
 		labelCol: { span: 8 },
 		wrapperCol: { span: 16 },
-	};
+	}
 
-	const tailLayout = {
-		wrapperCol: { offset: 8, span: 16 },
-	};
+	const tailLayout = { wrapperCol: { offset: 8, span: 16 } }
 
 	const formattedDishes = dishes.map(({ _id, name, description, price }) => (
 		{ key: _id, name, description, price }
@@ -69,9 +62,7 @@ const Dish = ({ dishes, getDishes }) => {
 					<DishFormFields />
 
 					<Form.Item {...tailLayout}>
-						<Button type="primary" htmlType="submit">
-							Create
-        		</Button>
+						<Button type="primary" htmlType="submit">Create</Button>
 					</Form.Item>
 
 				</Form>
@@ -94,14 +85,15 @@ const Dish = ({ dishes, getDishes }) => {
 
 				</div>
 
-				<Table
+				<EditableTable
+					data={formattedDishes}
 					rowSelection={{ selectedRowKeys: selectedDishes, onChange: onSelectDishes }}
-					columns={columns} dataSource={formattedDishes}
 				/>
+
 			</Col>
 
 		</Row>
-	);
-};
+	)
+}
 
-export default Dish;
+export default Dish
